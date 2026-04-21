@@ -26,7 +26,16 @@ type Rule struct {
 	Substring bool
 }
 
+// matchesRule reports whether the given field value satisfies the rule's match criteria.
+func matchesRule(r Rule, fieldValue string) bool {
+	if r.Substring {
+		return strings.Contains(strings.ToLower(fieldValue), strings.ToLower(r.Value))
+	}
+	return strings.EqualFold(fieldValue, r.Value)
+}
+
 // Apply applies highlight rules to a log entry, returning a colorized string.
+// Rules are evaluated in order; the first matching rule's color is used.
 func Apply(entry parser.Entry, rules []Rule) string {
 	color := ""
 	for _, r := range rules {
@@ -34,14 +43,7 @@ func Apply(entry parser.Entry, rules []Rule) string {
 		if !ok {
 			continue
 		}
-		s := fmt.Sprintf("%v", v)
-		matched := false
-		if r.Substring {
-			matched = strings.Contains(strings.ToLower(s), strings.ToLower(r.Value))
-		} else {
-			matched = strings.EqualFold(s, r.Value)
-		}
-		if matched {
+		if matchesRule(r, fmt.Sprintf("%v", v)) {
 			color = r.Color
 			break
 		}
