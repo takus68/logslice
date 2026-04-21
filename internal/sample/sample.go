@@ -59,7 +59,7 @@ func randomSample(entries []parser.Entry, rate float64, seed int64) []parser.Ent
 		return entries
 	}
 	r := rand.New(rand.NewSource(seed))
-	out := make([]parser.Entry, 0)
+	out := make([]parser.Entry, 0, int(float64(len(entries))*rate)+1)
 	for _, e := range entries {
 		if r.Float64() < rate {
 			out = append(out, e)
